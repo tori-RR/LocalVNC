@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>LocalVNC</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="module" src="./main.js"></script>
+  </head>
+  <body>
+    <svg class="icon-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <symbol id="i-screen" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></symbol>
+      <symbol id="i-left" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></symbol>
+      <symbol id="i-right" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+      <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+      <symbol id="i-edit" viewBox="0 0 24 24"><path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15l-1 6ZM13 20h8"/></symbol>
+      <symbol id="i-expand" viewBox="0 0 24 24"><path d="M9 4H4v5m11-5h5v5M4 15v5h5m11-5v5h-5"/></symbol>
+      <symbol id="i-keyboard" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M6 9h.01M10 9h.01M14 9h.01M18 9h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M7 16h10"/></symbol>
+      <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="15" cy="17" r="3"/></symbol>
+      <symbol id="i-terminal" viewBox="0 0 24 24"><path d="m5 7 5 5-5 5m8 0h6"/></symbol>
+      <symbol id="i-power" viewBox="0 0 24 24"><path d="M12 3v9m-6.4-6.4a9 9 0 1 0 12.8 0"/></symbol>
+      <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></symbol>
+    </svg>
+    <div id="app" class="app">
+      <header class="topbar" data-tauri-drag-region>
+        <div class="brand-group" data-tauri-drag-region>
+          <span class="brand" data-tauri-drag-region><img class="brand-icon" src="./assets/macintosh.png" width="32" height="32" alt="" draggable="false" />LocalVNC</span>
+          <button id="toggle-left" class="icon-button panel-toggle" type="button" aria-label="隐藏服务器列表" aria-controls="server-sidebar" aria-expanded="true" title="隐藏服务器列表"><svg aria-hidden="true"><use href="#i-left"/></svg></button>
+        </div>
+        <nav class="mode-switch" aria-label="连接方式">
+          <button id="mode-pve" class="mode-button" type="button" aria-pressed="true">PVE 控制台</button>
+          <button id="mode-direct" class="mode-button" type="button" aria-pressed="false">VNC 直连</button>
+        </nav>
+        <div class="topbar-actions" data-tauri-drag-region>
+          <button id="open-settings" class="icon-button" type="button" aria-label="设置" title="设置"><svg aria-hidden="true"><use href="#i-settings"/></svg></button>
+          <span class="toolbar-divider" aria-hidden="true"></span>
+          <button id="toggle-right" class="icon-button panel-toggle" type="button" aria-label="隐藏 SSH 终端" aria-controls="ssh-sidebar" aria-expanded="true" title="隐藏 SSH 终端"><svg aria-hidden="true"><use href="#i-right"/></svg></button>
+          <div id="window-controls" class="window-controls" data-maximized="false" aria-label="窗口操作" hidden>
+            <button id="window-minimize" class="window-button" type="button" aria-label="最小化窗口" title="最小化窗口"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1 6h10"/></svg></button>
+            <button id="window-maximize" class="window-button" type="button" aria-label="最大化窗口" title="最大化窗口"><svg class="window-maximize-icon" viewBox="0 0 12 12" aria-hidden="true"><rect x="1.5" y="1.5" width="9" height="9"/></svg><svg class="window-restore-icon" viewBox="0 0 12 12" aria-hidden="true"><path d="M4 3V1.5h6.5V8H9"/><rect x="1.5" y="4" width="6.5" height="6.5"/></svg></button>
+            <button id="window-close" class="window-button window-close" type="button" aria-label="关闭窗口" title="关闭窗口"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="m1.5 1.5 9 9m0-9-9 9"/></svg></button>
+          </div>
+        </div>
+      </header>
+      <aside id="server-sidebar" class="sidebar panel">
+        <header class="panel-header sidebar-header">
+          <div class="panel-heading"><h2>服务器</h2><span id="server-count" class="count">0</span></div>
+          <button id="add-server" class="icon-button" type="button" aria-label="添加服务器" title="添加服务器"><svg aria-hidden="true"><use href="#i-plus"/></svg></button>
+        </header>
+        <div class="server-search"><svg aria-hidden="true"><use href="#i-search"/></svg><input id="server-search" type="search" placeholder="筛选服务器" aria-label="筛选服务器" autocomplete="off" spellcheck="false" /><button id="clear-server-search" class="icon-button" type="button" aria-label="清除服务器筛选" title="清除筛选" hidden><svg aria-hidden="true"><use href="#i-close"/></svg></button></div>
+        <ul id="servers" class="servers" aria-label="服务器列表"></ul>
+        <footer class="sidebar-footer">
+          <button id="edit-server" class="quiet-button" type="button" disabled><svg aria-hidden="true"><use href="#i-edit"/></svg>编辑服务器</button>
+          <span class="local-note"><span aria-hidden="true"></span>配置保存在本机</span>
+        </footer>
+      </aside>
+      <section class="workspace panel" aria-label="VNC 远程桌面">
+        <header class="stage-bar panel-header">
+          <div class="title-wrap"><h1 id="stage-title">未选择服务器</h1><div class="stage-context"><span id="stage-status" class="status" role="status">未连接</span><span id="stage-target" hidden></span></div></div>
+          <div class="stage-actions">
+            <button id="connect" class="primary-button compact-button" type="button" disabled>连接</button>
+            <button id="toggle-keyboard" class="icon-button" type="button" aria-label="展开虚拟键盘" aria-controls="virtual-keyboard" aria-expanded="false" title="展开虚拟键盘"><svg aria-hidden="true"><use href="#i-keyboard"/></svg></button>
+            <button id="fullscreen" class="icon-button" type="button" aria-label="全屏显示远程桌面" title="全屏"><svg aria-hidden="true"><use href="#i-expand"/></svg></button>
+          </div>
+        </header>
+        <div class="stage">
+          <div class="remote-viewport">
+            <div id="screen"></div>
+            <div id="workspace-empty" class="workspace-empty">
+              <div class="empty-art" aria-hidden="true"><div class="empty-art-screen"><svg><use href="#i-terminal"/></svg><span></span><span></span></div><div class="empty-art-foot"></div><span class="empty-art-badge"><svg><use href="#i-screen"/></svg></span></div>
+              <span id="empty-eyebrow" class="empty-eyebrow">你的远程工作台</span>
+              <h2 id="empty-title">从一台服务器开始</h2>
+              <p id="empty-description">连接远程桌面，在同一个窗口中使用 SSH。</p>
+              <button id="empty-action" class="primary-button" type="button">添加服务器</button>
+            </div>
+            <p id="stage-hint" class="hint" role="status" hidden></p>
+          </div>
+          <section id="virtual-keyboard" class="virtual-keyboard" aria-label="远程虚拟键盘" hidden></section>
+        </div>
+        <footer class="workspace-footer"><span class="panel-caption">远程桌面</span><span id="input-status">尚未连接</span></footer>
+      </section>
+      <aside id="ssh-sidebar" class="ssh-sidebar panel" aria-label="SSH 终端">
+        <header class="panel-header ssh-header">
+          <div class="panel-heading"><svg class="heading-icon" aria-hidden="true"><use href="#i-terminal"/></svg><h2>SSH 终端</h2></div>
+          <div class="ssh-header-actions"><span id="ssh-status" class="status" role="status">未连接</span><button id="ssh-disconnect" class="icon-button" type="button" disabled aria-label="断开 SSH" title="断开 SSH"><svg aria-hidden="true"><use href="#i-power"/></svg></button></div>
+        </header>
+        <details id="ssh-profile" class="ssh-profile" open>
+          <summary>连接信息<span class="disclosure-chevron" aria-hidden="true"></span></summary>
+          <form id="ssh-form" class="ssh-form">
+            <label class="field-label" for="ssh-host">主机地址</label>
+            <input id="ssh-host" name="host" type="text" placeholder="主机名或 IP 地址" autocomplete="off" spellcheck="false" required />
+            <div class="ssh-fields-row">
+              <div><label class="field-label" for="ssh-username">用户名</label><input id="ssh-username" name="username" type="text" value="root" placeholder="root" autocomplete="off" spellcheck="false" required /></div>
+              <div><label class="field-label" for="ssh-port">端口</label><input id="ssh-port" name="port" type="number" value="22" min="1" max="65535" required /></div>
+            </div>
+            <button id="ssh-connect" class="secondary-button" type="submit"><svg aria-hidden="true"><use href="#i-terminal"/></svg><span id="ssh-connect-label">连接 SSH</span></button>
+          </form>
+        </details>
+        <div class="terminal-area">
+          <div id="ssh-terminal" aria-label="SSH 交互终端"></div>
+          <div id="ssh-empty" class="terminal-empty"><svg aria-hidden="true"><use href="#i-terminal"/></svg><h3>桌面与命令行，一起工作</h3><p>填写主机信息，连接 SSH。<br />收起侧栏也能保持会话。</p></div>
+        </div>
+        <p id="ssh-hint" class="terminal-hint" role="status"></p>
+        <footer class="ssh-footer"><span id="ssh-target">尚未连接主机</span><span class="panel-caption">SSH</span></footer>
+      </aside>
+    </div>
+    <dialog id="server-dialog" aria-labelledby="server-dialog-title">
+      <header class="dialog-header"><div><span class="dialog-eyebrow">连接配置</span><h2 id="server-dialog-title">服务器设置</h2></div><button id="server-dialog-close" class="icon-button" type="button" aria-label="关闭服务器设置" title="关闭"><svg aria-hidden="true"><use href="#i-close"/></svg></button></header>
+      <form id="server-form" class="add">
+        <label class="field-label" for="server-kind">连接方式</label>
+        <select id="server-kind" name="kind"><option value="pve">PVE 控制台</option><option value="direct">VNC 直连</option></select>
+        <label class="field-label" for="server-name">显示名称</label>
+        <input id="server-name" name="name" type="text" placeholder="例如：开发服务器" autocomplete="off" required />
+        <label class="for-pve field-label" for="server-origin">PVE 地址</label>
+        <input class="for-pve" id="server-origin" name="origin" type="text" placeholder="https://主机:8006" autocomplete="off" spellcheck="false" />
+        <div class="for-pve form-row">
+          <div><label class="field-label" for="server-node">节点</label><input id="server-node" name="node" type="text" placeholder="pve" autocomplete="off" /></div>
+          <div><label class="field-label" for="server-vmid">VMID</label><input id="server-vmid" name="vmid" type="number" min="1" placeholder="100" /></div>
+        </div>
+        <label class="for-pve field-label" for="server-username">用户名</label>
+        <input class="for-pve" id="server-username" name="username" type="text" placeholder="root@pam" autocomplete="off" spellcheck="false" />
+        <label class="for-pve checkbox-label"><input id="insecure" type="checkbox" />此 PVE 跳过证书验证（不安全）</label>
+        <label class="for-direct field-label" for="server-address" hidden>VNC 地址</label>
+        <input class="for-direct" id="server-address" name="address" type="text" placeholder="192.0.2.9::5900" autocomplete="off" spellcheck="false" hidden />
+        <label class="for-direct field-label" for="server-vnc-username" hidden>预设 VNC 用户名（可选）</label>
+        <input class="for-direct" id="server-vnc-username" name="vncUsername" type="text" placeholder="例如：user" autocomplete="off" spellcheck="false" aria-describedby="vnc-username-note" hidden />
+        <p class="for-direct field-note" id="vnc-username-note" hidden>连接时自动检测是否需要用户名；填写后仅作自动填充。与右侧 SSH 用户名分别设置。</p>
+        <label class="for-direct field-label" for="server-security" hidden>安全策略</label>
+        <select class="for-direct" id="server-security" name="securityPolicy" hidden><option value="preferTls">自动选择（TLS / macOS / 传统 VNC）</option><option value="requireTls">必须使用 TLSVnc</option><option value="plain">不使用 TLS（macOS / 传统 VNC）</option></select>
+        <p id="server-form-error" class="form-error" role="alert"></p>
+      </form>
+      <div class="add-actions"><button id="forget-password" class="quiet-button" type="button" disabled>清除密码</button><span class="action-spacer"></span><button id="new-server" class="secondary-button" type="button">新增</button><button id="server-save" class="primary-button" type="submit" form="server-form">保存服务器</button></div>
+    </dialog>
+    <dialog id="confirm-dialog" class="alert-dialog" role="alertdialog" aria-labelledby="confirm-title" aria-describedby="confirm-message">
+      <form method="dialog">
+        <h2 id="confirm-title">删除服务器？</h2>
+        <p id="confirm-message" class="note">此服务器的配置和已保存的密码将从这台电脑移除，无法撤销。</p>
+        <div class="dialog-actions"><button class="secondary-button" value="cancel" autofocus>取消</button><button class="danger-button" value="delete">删除</button></div>
+      </form>
+    </dialog>
+    <dialog id="settings" aria-labelledby="settings-title">
+      <form method="dialog">
+        <span class="dialog-eyebrow">远程桌面</span><h2 id="settings-title">设置</h2>
+        <label class="checkbox-label setting-row"><input id="scale" type="checkbox" /><span><strong>缩放以适应窗口</strong><small>调整窗口大小时，完整显示远程桌面。</small></span></label>
+        <label class="checkbox-label setting-row"><input id="view-only" type="checkbox" /><span><strong>只查看，不发送键鼠</strong><small>立即暂停对远程桌面的操作。</small></span></label>
+        <label class="checkbox-label setting-row"><input id="shared" type="checkbox" /><span><strong>共享远程会话</strong><small>与其他 VNC 客户端共享画面，下一次连接生效。</small></span></label>
+        <p class="note">PVE 证书验证在各服务器设置中单独管理，默认启用。</p>
+        <div class="dialog-actions"><button class="primary-button" value="close">完成</button></div>
+      </form>
+    </dialog>
+    <dialog id="password-dialog" aria-labelledby="password-title">
+      <form id="password-form">
+        <span id="password-context" class="dialog-eyebrow">身份验证</span><h2 id="password-title">连接</h2>
+        <div id="password-username-field" hidden><label class="field-label" for="password-username">VNC 用户名</label><input id="password-username" type="text" autocomplete="username" spellcheck="false" /></div>
+        <label class="field-label" for="password">密码</label><input id="password" type="password" autocomplete="current-password" />
+        <label class="remember checkbox-label"><input id="remember-password" type="checkbox" checked />记住密码</label>
+        <p id="password-note" class="note"></p>
+        <div class="dialog-actions"><button id="password-cancel" class="secondary-button" type="button">取消</button><button class="primary-button" type="submit">连接</button></div>
+      </form>
+    </dialog>
+  </body>
+</html>

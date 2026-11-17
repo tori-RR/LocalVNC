@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-console"
+description = "Open and close a local console session"
+commands.allow = ["begin_session", "connect_pve", "connect_direct", "disconnect", "ssh_connect", "ssh_write", "ssh_resize", "ssh_ack", "ssh_disconnect", "load_config", "save_config", "password_saved", "load_password", "save_password", "forget_password"]

@@ -1,0 +1,25 @@
+{
+  "name": "localvnc",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.cjs",
+    "dev": "vite",
+    "build": "vite build",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@novnc/novnc": "1.6.0",
+    "@tauri-apps/api": "^2",
+    "@xterm/addon-fit": "0.11.0",
+    "@xterm/xterm": "6.0.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2",
+    "vite": "^6"
+  },
+  "allowScripts": {
+    "esbuild@0.25.12": true
+  }
+}

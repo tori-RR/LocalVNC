@@ -1,0 +1,18 @@
+[
+  { "input": "192.0.2.5:8006", "expected": "https://192.0.2.5:8006", "host": "192.0.2.5" },
+  { "input": "pve.example:8006", "expected": "https://pve.example:8006", "host": "pve.example" },
+  { "input": " https://PVE.example:8006/// ", "expected": "https://pve.example:8006", "host": "pve.example" },
+  { "input": "HTTPS://pve.example:443", "expected": "https://pve.example", "host": "pve.example" },
+  { "input": "[2001:db8::5]:8006", "expected": "https://[2001:db8::5]:8006", "host": "2001:db8::5" },
+  { "input": "https://[::1]:8006/", "expected": "https://[::1]:8006", "host": "::1" },
+  { "input": "", "expected": null },
+  { "input": "http://pve.example:8006", "expected": null },
+  { "input": "https://user:password@pve.example", "expected": null },
+  { "input": "https://pve.example/api2", "expected": null },
+  { "input": "https://pve.example?", "expected": null },
+  { "input": "https://pve.example#", "expected": null },
+  { "input": "https://pve.example?a=1", "expected": null },
+  { "input": "https://pve.example#test", "expected": null },
+  { "input": "pve.example:70000", "expected": null },
+  { "input": "2001:db8::5", "expected": null }
+]

@@ -1,0 +1,55 @@
+.vnc-input-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 20px;
+  background: transparent;
+  cursor: pointer;
+  user-select: none;
+  touch-action: none;
+}
+.vnc-input-overlay[hidden] { display: none; }
+.vnc-input-overlay:focus-visible { outline: 2px solid var(--accent, #f0f0f0); outline-offset: -3px; }
+.vnc-input-message {
+  max-width: 100%;
+  padding: 10px 17px;
+  border: 1px solid #dadada30;
+  border-top-color: #e4e4e44d;
+  border-radius: 999px;
+  background: #242424;
+  box-shadow: inset 0 1px 0 #ffffff08, 0 3px 8px #00000024, 0 10px 24px #00000030;
+  color: #e5e5e5;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: center;
+  text-wrap: balance;
+  pointer-events: none;
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .vnc-input-message {
+    background: linear-gradient(160deg, #ffffff0a, #ffffff00), #1d1d1de8;
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+  }
+}
+.vnc-input-readonly { cursor: default; }
+.vnc-input-readonly .vnc-input-message { color: #c6c6c6; }
+
+@media (max-height: 620px) {
+  .vnc-input-overlay { padding: 12px; }
+  .vnc-input-message { padding: 8px 14px; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .vnc-input-message { background: #242424; -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+@media (prefers-contrast: more) {
+  .vnc-input-message { border-color: #c6c6c6; background: #141414; color: #fff; -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+@media (forced-colors: active) {
+  .vnc-input-message, .vnc-input-readonly .vnc-input-message { border-color: ButtonText; color: ButtonText; background: Canvas; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .vnc-input-overlay:focus-visible { outline-color: Highlight; }
+}

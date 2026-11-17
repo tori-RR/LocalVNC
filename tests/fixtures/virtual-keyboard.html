@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LocalVNC isolated virtual keyboard test</title>
+  <link rel="stylesheet" href="/src/styles.css">
+  <style>
+    body { padding: 18px; }
+    .fixture-heading { display: flex; align-items: baseline; flex-wrap: wrap; gap: 9px 18px; margin-bottom: 15px; }
+    .fixture-heading h1 { margin: 0; font-size: 16px; font-weight: 550; }
+    .fixture-heading p { margin: 0; color: #8b949e; font-size: 11px; }
+    .fixture-layout { display: grid; grid-template-columns: minmax(280px, 1fr) 320px; grid-template-areas: "main checks"; gap: 14px; height: calc(100% - 36px); }
+    .fixture-controls { grid-area: checks; display: flex; flex-direction: column; min-height: 0; gap: 14px; padding: 16px; overflow: auto; }
+    .fixture-controls h2 { margin: 0; font-size: 13px; font-weight: 550; }
+    .fixture-controls p { margin: 0; color: #8d99a4; font-size: 11px; line-height: 1.8; }
+    .fixture-controls label { color: #b5c0ca; font-size: 11px; }
+    .fixture-controls input[type="text"] { margin-top: 8px; }
+    .fixture-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .fixture-controls .checkbox-label { margin: 0; }
+    #counts { color: #b7c8bf; }
+    #packets { min-height: 80px; flex: 1; margin: 0; padding: 12px; overflow: auto; border: 1px solid #2c343a; border-radius: 8px; background: #0d1012; color: #b3c2d0; font: 11px/1.5 Consolas, monospace; white-space: pre-wrap; }
+    .fixture-keyboard-icon { width: 17px; height: 17px; }
+    @media (max-width: 760px) { body { padding: 10px; } .fixture-layout { grid-template-columns: minmax(280px, 1fr) 210px; gap: 8px; } .fixture-controls { gap: 10px; padding: 11px; } }
+  </style>
+</head>
+<body>
+  <header class="fixture-heading">
+    <h1>LocalVNC · 虚拟键盘验证</h1>
+    <p>本机合成 RFB 画面，无真实服务器或远程凭据。</p>
+  </header>
+  <main class="fixture-layout">
+    <section class="workspace panel" aria-label="VNC 远程桌面">
+      <header class="stage-bar panel-header">
+        <div class="title-wrap"><h1>本机合成画面</h1><span id="state" class="status">正在连接</span></div>
+        <div class="stage-actions">
+          <button id="toggle-keyboard" class="icon-button" type="button" aria-label="展开虚拟键盘" aria-controls="virtual-keyboard" aria-expanded="false" title="展开虚拟键盘">
+            <svg class="fixture-keyboard-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h.01M10 9h.01M14 9h.01M17 9h.01M7 12h.01M10 12h.01M14 12h.01M17 12h.01M8 15h8"/></svg>
+          </button>
+          <button id="fullscreen" class="icon-button" type="button" aria-label="全屏显示远程桌面" title="全屏"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4H4v5m11-5h5v5M4 15v5h5m11-5v5h-5"/></svg></button>
+        </div>
+      </header>
+      <div class="stage">
+        <div class="remote-viewport"><div id="screen"></div></div>
+        <section id="virtual-keyboard" class="virtual-keyboard" aria-label="远程虚拟键盘" hidden></section>
+      </div>
+      <footer class="workspace-footer"><span>隔离回环验证</span><span>320 × 200 · VNC</span></footer>
+    </section>
+    <aside class="fixture-controls panel">
+      <h2>接收端事件</h2>
+      <p>先点击画面取得控制，再展开键盘。展开操作不应产生键盘包；修饰键选中后，点击普通按键才发送完整组合。</p>
+      <label for="local-input">SSH / 本地输入框<input id="local-input" type="text" placeholder="这里的输入不应传给远端" autocomplete="off"></label>
+      <div class="fixture-actions"><button id="clear" class="secondary-button compact-button" type="button">清空包日志</button><button id="blur" class="secondary-button compact-button" type="button">模拟窗口失焦</button></div>
+      <label class="checkbox-label"><input id="readonly" type="checkbox">只读模式</label>
+      <p id="counts">等候数据</p>
+      <pre id="packets" aria-label="RFB 接收包">[]</pre>
+    </aside>
+  </main>
+  <script type="module">
+    import RFB from '@novnc/novnc/lib/rfb.js';
+    import { createVncInputGuard } from '/src/vnc-input.js';
+    import { createVirtualKeyboard } from '/src/virtual-keyboard.js';
+
+    const screen = document.querySelector('#screen');
+    const state = document.querySelector('#state');
+    const keyboardButton = document.querySelector('#toggle-keyboard');
+    const container = document.querySelector('#virtual-keyboard');
+    const blurButton = document.querySelector('#blur');
+    const clearButton = document.querySelector('#clear');
+    const readOnlyInput = document.querySelector('#readonly');
+    let connected = false, rfb = null, keyboard = null;
+    function updateInputControls(value = {}) {
+      state.textContent = !connected ? '未连接' : readOnlyInput.checked ? '只读模式' : guard.canControl ? '控制中' : '已暂停';
+      state.dataset.state = connected && guard.canControl ? 'connected' : 'paused';
+      state.dataset.paused = String(value.paused ?? guard.paused);
+      keyboard?.setState({ connected, canControl: guard.canControl, readOnly: readOnlyInput.checked });
+    }
+    const guard = createVncInputGuard({ screen,
+      allowControlTargets: [keyboardButton, container, blurButton, clearButton], onChange: updateInputControls });
+    keyboard = createVirtualKeyboard({
+      container,
+      beforeSend: () => guard.prepareVirtualInput(),
+      sendKey(keysym, code, down) {
+        if (rfb && connected && !readOnlyInput.checked && guard.canControl) rfb.sendKey(keysym, code, down);
+      },
+      onVisibilityChange(visible) {
+        keyboardButton.setAttribute('aria-expanded', String(visible));
+        keyboardButton.setAttribute('aria-label', visible ? '收起虚拟键盘' : '展开虚拟键盘');
+        keyboardButton.title = visible ? '收起虚拟键盘' : '展开虚拟键盘';
+        if (!visible && guard.canControl) rfb?.focus({ preventScroll: true });
+      },
+    });
+    for (const target of [keyboardButton, container]) {
+      for (const event of ['pointerdown', 'focusin']) target.addEventListener(event, () => guard.prepareVirtualInput());
+    }
+    keyboardButton.addEventListener('click', () => keyboard.toggle());
+    rfb = new RFB(screen, `ws://${location.host}/__fixture/rfb`, { shared: true });
+    rfb.scaleViewport = true;
+    rfb.viewOnly = true;
+    rfb.focusOnClick = false;
+    rfb.addEventListener('connect', () => { connected = true; guard.attach(rfb); });
+    rfb.addEventListener('disconnect', () => { connected = false; guard.detach(); });
+    blurButton.addEventListener('click', () => window.dispatchEvent(new Event('blur')));
+    readOnlyInput.addEventListener('change', () => guard.setReadOnly(readOnlyInput.checked));
+    document.querySelector('#fullscreen').addEventListener('click', async () => {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else await document.querySelector('.workspace').requestFullscreen();
+    });
+
+    async function showPackets() {
+      try {
+        const data = await fetch('/__fixture/events', { cache: 'no-store' }).then(response => response.json());
+        const keys = data.events.filter(event => event.kind === 'key');
+        const pointers = data.events.filter(event => event.kind === 'pointer');
+        document.querySelector('#counts').textContent = `连接 ${data.connections} · 键盘 ${keys.length} · 鼠标 ${pointers.length}`;
+        document.querySelector('#packets').textContent = JSON.stringify(data.events.slice(-40), null, 2);
+      } catch { document.querySelector('#counts').textContent = '测试服务未连接'; }
+    }
+    clearButton.addEventListener('click', async () => {
+      await fetch('/__fixture/clear', { method: 'POST' });
+      await showPackets();
+    });
+    const packetTimer = setInterval(showPackets, 200);
+    window.addEventListener('pagehide', () => {
+      clearInterval(packetTimer);
+      keyboard.dispose();
+      guard.dispose();
+      rfb.disconnect();
+    }, { once: true });
+  </script>
+</body>
+</html>
