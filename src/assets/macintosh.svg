@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none" role="img" aria-labelledby="localvnc-title localvnc-desc">
+  <title id="localvnc-title">LocalVNC</title>
+  <desc id="localvnc-desc">A beige desktop computer with a pixel-style smiling CRT display and a floppy disk drive.</desc>
+  <defs>
+    <linearGradient id="localvnc-case" x1="68" y1="28" x2="191" y2="224" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F5E9D4"/>
+      <stop offset="0.5" stop-color="#E9D7BB"/>
+      <stop offset="1" stop-color="#D4BB9C"/>
+    </linearGradient>
+    <linearGradient id="localvnc-bevel" x1="45" y1="30" x2="212" y2="225" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E4D1B2"/>
+      <stop offset="0.45" stop-color="#C6AE8E"/>
+      <stop offset="1" stop-color="#8D7965"/>
+    </linearGradient>
+    <linearGradient id="localvnc-recess" x1="66" y1="51" x2="189" y2="159" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#615C53"/>
+      <stop offset="0.45" stop-color="#373A3A"/>
+      <stop offset="1" stop-color="#1E252B"/>
+    </linearGradient>
+    <radialGradient id="localvnc-glass" cx="0" cy="0" r="1" gradientTransform="translate(113 93) rotate(57) scale(88 106)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C6D1D7"/>
+      <stop offset="0.72" stop-color="#A4B4C0"/>
+      <stop offset="1" stop-color="#7B919F"/>
+    </radialGradient>
+    <linearGradient id="localvnc-foot" x1="128" y1="221" x2="128" y2="240" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B8A48D"/>
+      <stop offset="1" stop-color="#897D70"/>
+    </linearGradient>
+  </defs>
+
+  <path d="M51 235H205L211 241H45L51 235Z" fill="#1D2023" opacity="0.16"/>
+  <path d="M52 215H204V234C204 237.314 201.314 240 198 240H58C54.686 240 52 237.314 52 234V215Z" fill="url(#localvnc-foot)" stroke="#37322D" stroke-width="2.5"/>
+  <path d="M57 231H199" stroke="#D4C4AE" stroke-width="1.5"/>
+
+  <path d="M55 24H201L212 35V218L203 228H53L44 218V35L55 24Z" fill="url(#localvnc-bevel)" stroke="#342E29" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M55 28H201L207 35H49L55 28Z" fill="#F5EAD6"/>
+  <path d="M48 36L54 42V216L48 220V36Z" fill="#F4E6CE"/>
+  <path d="M207 36L201 42V216L207 220V36Z" fill="#A98F73"/>
+  <path d="M54 36H202V216H54V36Z" fill="url(#localvnc-case)" stroke="#C5AD8C" stroke-width="1.5"/>
+  <path d="M58 39H198" stroke="#FFF5E3" stroke-width="1.5"/>
+  <path d="M50 219H206L201 224H55L50 219Z" fill="#BDA487"/>
+
+  <path d="M63 50H193V159H63V50Z" fill="#A98F71"/>
+  <path d="M63 50H193L185 58H71L63 50Z" fill="#8D7C68"/>
+  <path d="M63 50L71 58V151L63 159V50Z" fill="#BCA585"/>
+  <path d="M63 159L71 151H185L193 159H63Z" fill="#F2E4CC"/>
+  <path d="M193 50L185 58V151L193 159V50Z" fill="#DCC5A4"/>
+  <rect x="70" y="57" width="116" height="95" rx="5" fill="url(#localvnc-recess)" stroke="#302D29" stroke-width="2"/>
+  <path d="M91 62H165C176 62 181 68 181 80V129C181 141 176 147 165 147H91C80 147 75 141 75 129V80C75 68 80 62 91 62Z" fill="url(#localvnc-glass)" stroke="#202D37" stroke-width="2"/>
+  <path d="M81 82C81 71 85 67 97 67H113" stroke="#E5EFF1" stroke-width="3.5" stroke-linecap="round" opacity="0.86"/>
+  <path d="M88 142H164C172 142 176 139 177 132" stroke="#D2DFE4" stroke-width="1.25" stroke-linecap="round" opacity="0.55"/>
+
+  <g id="localvnc-pixel-face" transform="translate(114 90) scale(2)" fill="#2D3D49" shape-rendering="crispEdges">
+    <path d="M1 0H13V1H1ZM0 1H1V15H0ZM13 1H14V15H13ZM1 15H13V16H1Z"/>
+    <path d="M3 4H4V6H3ZM10 4H11V6H10ZM7 5H8V10H5V9H7Z"/>
+    <path d="M3 11H4V12H5V13H9V12H10V11H11V13H10V14H4V13H3Z"/>
+    <path d="M2 17H12V18H2Z"/>
+  </g>
+
+  <path d="M130 183H192V195H130V183Z" fill="#B49A7C"/>
+  <path d="M131 184H191V193H131V184Z" fill="#E2CBA9"/>
+  <path d="M134 188H184V191H134V188Z" fill="#33322F"/>
+  <path d="M177 183H191V192H177V183Z" fill="#62594E" stroke="#392F27" stroke-width="1.5"/>
+  <path d="M179 185H188V188H179V185Z" fill="#9A8D79"/>
+  <path d="M134 194H176" stroke="#F4E7D0" stroke-width="1.5"/>
+
+  <g>
+    <path d="M60 185H71V187H60Z" fill="#6CBB43"/>
+    <path d="M60 187H71V189H60Z" fill="#F5D94C"/>
+    <path d="M60 189H71V191H60Z" fill="#EF9C3D"/>
+    <path d="M60 191H71V193H60Z" fill="#D95649"/>
+    <path d="M60 193H71V195H60Z" fill="#A276AB"/>
+    <path d="M60 195H71V197H60Z" fill="#5B9EC3"/>
+  </g>
+  <path d="M59 210H197" stroke="#F5E9D3" stroke-width="1.5" opacity="0.65"/>
+</svg>

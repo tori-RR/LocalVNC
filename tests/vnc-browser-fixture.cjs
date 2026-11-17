@@ -67,7 +67,7 @@ async function main() {
             // copied UI, real configuration, credentials or desktop IPC exists.
             const source = await fs.readFile(path.join(root, 'src/index.html'), 'utf8');
             const html = source.replace('href="./styles.css"', 'href="/src/styles.css"')
-              .replace('src="./assets/macintosh.png"', 'src="/src/assets/macintosh.png"')
+              .replace('src="./assets/macintosh.svg"', 'src="/src/assets/macintosh.svg"')
               .replace('src="./main.js"', 'src="/src/main.js"')
               .replace('<title>LocalVNC</title>', '<title>LocalVNC · Isolated fixture</title>');
             response.setHeader('Content-Type', 'text/html; charset=utf-8');
